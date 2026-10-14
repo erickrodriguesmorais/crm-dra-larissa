@@ -896,3 +896,20 @@ footer {
     height: 210px;
   }
 }
+
+/* Gráfico de evolução mensal */
+.monthly-panel {
+  margin-bottom: 24px;
+}
+
+.monthly-chart-area {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+@media (max-width: 600px) {
+  .monthly-chart-area {
+    height: 250px;
+  }
+}
