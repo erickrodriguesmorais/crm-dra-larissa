@@ -6,6 +6,7 @@ let db = null;
 let leads = [];
 let sourceChart = null;
 let statusChart = null;
+let monthlyChart = null;
 let loading = false;
 
 const $ = id => document.getElementById(id);
