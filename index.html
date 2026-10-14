@@ -1,34 +1,316 @@
+
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>CRM | Dra. Larissa Lima</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script defer src="app.js"></script></head>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+
+  <title>CRM | Dra. Larissa Lima</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Biblioteca do Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Biblioteca dos gráficos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Código do CRM -->
+  <script defer src="app.js"></script>
+</head>
+
 <body>
-<section id="login-view" class="login-shell"><div class="login-card"><div class="mark">LL</div><p class="eyebrow">GESTÃO DE LEADS</p><h1>Dra. Larissa Lima</h1><p class="muted">Entre para acompanhar contatos e resultados do site.</p><form id="login-form"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required><button class="primary">Entrar no CRM</button><p id="login-message" class="message"></p></form><small>Acesso restrito. Os dados exigem autenticação e permissões corretas no Supabase.</small></div></section>
-<div id="app-view" class="layout hidden"><aside><div class="brand"><div class="mark small">LL</div><div><b>Dra. Larissa Lima</b><small>CRM de leads</small></div></div><a class="active" href="#overview">▦ &nbsp; Visão geral</a><a href="#leads">♙ &nbsp; Gestão de leads</a><button id="logout-button" class="logout">↪ Sair</button></aside>
-<main><header><div><p class="eyebrow">PAINEL DE CONTROLE</p><h1>Visão geral</h1><p class="muted">Acompanhe os contatos e os resultados dos canais digitais.</p></div><div class="tools"><span id="user-email"></span><button id="refresh-button" class="secondary">Atualizar dados</button></div></header>
-<section class="metrics"><article><span>♙</span><p>Total de leads</p><strong id="total-leads">—</strong><small>Registros no Supabase</small></article><article><span>⌂</span><p>Site principal</p><strong id="site-leads">—</strong><small>site_principal</small></article><article><span>◎</span><p>Bio do Instagram</p><strong id="bio-leads">—</strong><small>bio_instagram</small></article><article><span>✓</span><p>Agendados</p><strong id="scheduled-leads">—</strong><small>Status agendado</small></article></section>
 
-<section class="analytics-grid">
-  <article class="panel chart-panel">
-    <div class="panel-head">
-      <div>
-        <h2>Origem dos leads</h2>
-        <p class="muted">De onde vêm os contatos</p>
-      </div>
-    </div>
-    <div class="chart-area">
-      <canvas id="source-chart" role="img" aria-label="Gráfico de leads por origem"></canvas>
-    </div>
-  </article>
+  <!-- TELA DE LOGIN -->
+  <section id="login-view" class="login-shell">
+    <div class="login-card">
 
-  <article class="panel chart-panel">
-    <div class="panel-head">
-      <div>
-        <h2>Status dos leads</h2>
-        <p class="muted">Etapa de cada contato</p>
+      <div class="mark">LL</div>
+
+      <p class="eyebrow">GESTÃO DE LEADS</p>
+
+      <h1>Dra. Larissa Lima</h1>
+
+      <p class="muted">
+        Entre para acompanhar contatos e resultados do site.
+      </p>
+
+      <form id="login-form">
+
+        <label for="email">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          autocomplete="username"
+          required
+        >
+
+        <label for="password">Senha</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        >
+
+        <button class="primary" type="submit">
+          Entrar no CRM
+        </button>
+
+        <p id="login-message" class="message"></p>
+      </form>
+
+      <small>
+        Acesso restrito. Os dados exigem autenticação e permissões
+        corretas no Supabase.
+      </small>
+
+    </div>
+  </section>
+
+
+  <!-- PAINEL PRINCIPAL -->
+  <div id="app-view" class="layout hidden">
+
+    <!-- MENU LATERAL -->
+    <aside>
+
+      <div class="brand">
+        <div class="mark small">LL</div>
+
+        <div>
+          <b>Dra. Larissa Lima</b>
+          <small>CRM de leads</small>
+        </div>
       </div>
-    </div>
-    <div class="chart-area">
-      <canvas id="status-chart" role="img" aria-label="Gráfico de leads por status"></canvas>
-    </div>
-  </article>
-</section>
-<section class="panel" id="leads"><div class="panel-head"><div><h2>Últimos leads</h2><p class="muted">Pesquise contatos e atualize o andamento.</p></div><div class="filters"><input id="search-input" type="search" placeholder="Buscar nome ou WhatsApp"><select id="status-filter"><option value="">Todos os status</option><option value="novo">Novo</option><option value="contatado">Contatado</option><option value="agendado">Agendado</option><option value="concluido">Concluído</option><option value="perdido">Perdido</option></select></div></div><p id="data-message" class="notice">Configure o Supabase para carregar os leads.</p><div class="table-wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Origem</th><th>Status</th><th>Recebido em</th><th>Ação</th></tr></thead><tbody id="leads-table"><tr><td colspan="6" class="empty">Os leads aparecerão aqui após conectar o Supabase.</td></tr></tbody></table></div></section><footer>CRM de gestão de leads · Dra. Larissa Lima</footer></main></div></body></html>
+
+      <a class="active" href="#overview">
+        ▦ &nbsp; Visão geral
+      </a>
+
+      <a href="#leads">
+        ♙ &nbsp; Gestão de leads
+      </a>
+
+      <button id="logout-button" class="logout" type="button">
+        ↪ Sair
+      </button>
+
+    </aside>
+
+
+    <!-- CONTEÚDO -->
+    <main id="overview">
+
+      <!-- CABEÇALHO -->
+      <header>
+
+        <div>
+          <p class="eyebrow">PAINEL DE CONTROLE</p>
+
+          <h1>Visão geral</h1>
+
+          <p class="muted">
+            Acompanhe os contatos e os resultados dos canais digitais.
+          </p>
+        </div>
+
+        <div class="tools">
+          <span id="user-email"></span>
+
+          <button
+            id="refresh-button"
+            class="secondary"
+            type="button"
+          >
+            Atualizar dados
+          </button>
+        </div>
+
+      </header>
+
+
+      <!-- INDICADORES -->
+      <section class="metrics">
+
+        <article>
+          <span>♙</span>
+          <p>Total de leads</p>
+          <strong id="total-leads">—</strong>
+          <small>Registros no Supabase</small>
+        </article>
+
+        <article>
+          <span>⌂</span>
+          <p>Site principal</p>
+          <strong id="site-leads">—</strong>
+          <small>site_principal</small>
+        </article>
+
+        <article>
+          <span>◎</span>
+          <p>Bio do Instagram</p>
+          <strong id="bio-leads">—</strong>
+          <small>bio_instagram</small>
+        </article>
+
+        <article>
+          <span>✓</span>
+          <p>Agendados</p>
+          <strong id="scheduled-leads">—</strong>
+          <small>Status agendado</small>
+        </article>
+
+      </section>
+
+
+      <!-- GRÁFICOS -->
+      <section class="analytics-grid">
+
+        <!-- GRÁFICO DE ORIGEM -->
+        <article class="panel chart-panel">
+
+          <div class="panel-head">
+            <div>
+              <h2>Origem dos leads</h2>
+              <p class="muted">
+                De onde vêm os contatos
+              </p>
+            </div>
+          </div>
+
+          <div class="chart-area">
+            <canvas
+              id="source-chart"
+              role="img"
+              aria-label="Gráfico de leads por origem"
+            ></canvas>
+          </div>
+
+        </article>
+
+
+        <!-- GRÁFICO DE STATUS -->
+        <article class="panel chart-panel">
+
+          <div class="panel-head">
+            <div>
+              <h2>Status dos leads</h2>
+              <p class="muted">
+                Etapa de cada contato
+              </p>
+            </div>
+          </div>
+
+          <div class="chart-area">
+            <canvas
+              id="status-chart"
+              role="img"
+              aria-label="Gráfico de leads por status"
+            ></canvas>
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- GESTÃO DE LEADS -->
+      <section class="panel" id="leads">
+
+        <div class="panel-head">
+
+          <div>
+            <h2>Últimos leads</h2>
+
+            <p class="muted">
+              Pesquise contatos e atualize o andamento.
+            </p>
+          </div>
+
+
+          <!-- FILTROS -->
+          <div class="filters">
+
+            <input
+              id="search-input"
+              type="search"
+              placeholder="Buscar nome ou WhatsApp"
+              aria-label="Buscar por nome ou WhatsApp"
+            >
+
+            <select
+              id="origin-filter"
+              aria-label="Filtrar por origem"
+            >
+              <option value="">Todas as origens</option>
+              <option value="site_principal">Site principal</option>
+              <option value="bio_instagram">Bio do Instagram</option>
+            </select>
+
+            <select
+              id="status-filter"
+              aria-label="Filtrar por status"
+            >
+              <option value="">Todos os status</option>
+              <option value="novo">Novo</option>
+              <option value="contatado">Contatado</option>
+              <option value="agendado">Agendado</option>
+              <option value="concluido">Concluído</option>
+              <option value="perdido">Perdido</option>
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- MENSAGEM DE ESTADO -->
+        <p id="data-message" class="notice" role="status">
+          Configure o Supabase para carregar os leads.
+        </p>
+
+
+        <!-- TABELA -->
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>WhatsApp</th>
+                <th>Origem</th>
+                <th>Status</th>
+                <th>Recebido em</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+
+            <tbody id="leads-table">
+              <tr>
+                <td colspan="6" class="empty">
+                  Os leads aparecerão aqui após conectar o Supabase.
+                </td>
+              </tr>
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- RODAPÉ -->
+      <footer>
+        CRM de gestão de leads · Dra. Larissa Lima
+      </footer>
+
+    </main>
+
+  </div>
+
+</body>
+</html>
