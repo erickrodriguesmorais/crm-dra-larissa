@@ -1,6 +1,6 @@
 // Preencha com a URL do Supabase e a chave PUBLICÁVEL. Nunca use service_role/secret no navegador.
-const SUPABASE_URL = "COLE_A_URL_DO_SUPABASE_AQUI";
-const SUPABASE_PUBLISHABLE_KEY = "COLE_A_CHAVE_PUBLICAVEL_AQUI";
+const SUPABASE_URL = "https://bwhvfiklrvrodadbxoly.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_R5xKqfJPBmp6PEsiRAvZ1w_IIypXVPZ";
 let db=null, leads=[];
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
