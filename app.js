@@ -6,6 +6,7 @@ let db = null;
 let leads = [];
 let sourceChart = null;
 let statusChart = null;
+let loading = false;
 
 const $ = id => document.getElementById(id);
 
@@ -32,6 +33,7 @@ function showApp(user) {
 
 function date(value) {
   if (!value) return "—";
+
   const parsed = new Date(value);
 
   return isNaN(parsed)
@@ -44,6 +46,7 @@ function date(value) {
 
 function wa(value) {
   const digits = String(value || "").replace(/\D/g, "");
+
   return digits
     ? "https://wa.me/" + (digits.startsWith("55") ? digits : "55" + digits)
     : "";
@@ -63,16 +66,32 @@ function metrics() {
 }
 
 function updateCharts() {
-  if (!window.Chart) {
-    $("data-message").textContent =
-      "Os dados foram carregados, mas a biblioteca dos gráficos não abriu.";
-    return;
-  }
-
   const sourceCanvas = $("source-chart");
   const statusCanvas = $("status-chart");
 
-  if (!sourceCanvas || !statusCanvas) return;
+  if (!sourceCanvas || !statusCanvas) {
+    console.error("Os elementos canvas dos gráficos não foram encontrados.");
+    $("data-message").textContent =
+      "Os espaços dos gráficos não foram encontrados no HTML.";
+    return;
+  }
+
+  if (typeof window.Chart === "undefined") {
+    console.error("Chart.js não foi carregado.");
+    $("data-message").textContent =
+      "Os leads foram carregados, mas os gráficos não abriram. Verifique a conexão com a biblioteca de gráficos.";
+    return;
+  }
+
+  if (sourceChart) {
+    sourceChart.destroy();
+    sourceChart = null;
+  }
+
+  if (statusChart) {
+    statusChart.destroy();
+    statusChart = null;
+  }
 
   const sourceData = [
     leads.filter(lead => lead.origem === "site_principal").length,
@@ -82,6 +101,41 @@ function updateCharts() {
       lead.origem !== "bio_instagram"
     ).length
   ];
+
+  sourceChart = new window.Chart(sourceCanvas, {
+    type: "doughnut",
+    data: {
+      labels: ["Site principal", "Bio do Instagram", "Outras origens"],
+      datasets: [{
+        data: sourceData,
+        backgroundColor: ["#805846", "#8aaf9b", "#d9b779"],
+        borderColor: "#fffdfa",
+        borderWidth: 3,
+        hoverOffset: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            padding: 18,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              return `${context.label}: ${context.raw} lead(s)`;
+            }
+          }
+        }
+      }
+    }
+  });
 
   const statusKeys = [
     "novo",
@@ -103,43 +157,7 @@ function updateCharts() {
     leads.filter(lead => lead.status === status).length
   );
 
-  if (sourceChart) sourceChart.destroy();
-  if (statusChart) statusChart.destroy();
-
-  sourceChart = new Chart(sourceCanvas, {
-    type: "doughnut",
-    data: {
-      labels: [
-        "Site principal",
-        "Bio do Instagram",
-        "Outras origens"
-      ],
-      datasets: [{
-        data: sourceData,
-        backgroundColor: ["#284b63", "#8aaf9b", "#d9b779"],
-        borderWidth: 2,
-        borderColor: "#ffffff"
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "bottom"
-        },
-        tooltip: {
-          callbacks: {
-            label(context) {
-              return `${context.label}: ${context.raw} lead(s)`;
-            }
-          }
-        }
-      }
-    }
-  });
-
-  statusChart = new Chart(statusCanvas, {
+  statusChart = new window.Chart(statusCanvas, {
     type: "bar",
     data: {
       labels: statusLabels,
@@ -149,7 +167,7 @@ function updateCharts() {
         backgroundColor: [
           "#8aaf9b",
           "#d9b779",
-          "#284b63",
+          "#805846",
           "#6f8f72",
           "#c17c74"
         ],
@@ -158,14 +176,20 @@ function updateCharts() {
       }]
     },
     options: {
+      indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: "y",
       scales: {
         x: {
           beginAtZero: true,
           ticks: {
-            precision: 0
+            precision: 0,
+            stepSize: 1
+          }
+        },
+        y: {
+          grid: {
+            display: false
           }
         }
       },
@@ -188,8 +212,7 @@ function updateCharts() {
 function render() {
   const query = $("search-input").value.trim().toLowerCase();
   const selectedStatus = $("status-filter").value;
-  const originElement = $("origin-filter");
-  const selectedOrigin = originElement ? originElement.value : "";
+  const selectedOrigin = $("origin-filter")?.value || "";
 
   const rows = leads.filter(lead => {
     const matchesSearch =
@@ -208,36 +231,29 @@ function render() {
 
   $("leads-table").innerHTML = rows.length
     ? rows.map(lead => {
-        const statuses = [
-          "novo",
-          "contatado",
-          "agendado",
-          "concluido",
-          "perdido"
+        const statusOptions = [
+          ["novo", "Novo"],
+          ["contatado", "Contatado"],
+          ["agendado", "Agendado"],
+          ["concluido", "Concluído"],
+          ["perdido", "Perdido"]
         ];
 
-        const statusLabels = {
-          novo: "Novo",
-          contatado: "Contatado",
-          agendado: "Agendado",
-          concluido: "Concluído",
-          perdido: "Perdido"
-        };
-
-        const options = statuses.map(status =>
-          `<option value="${status}" ${
-            lead.status === status ? "selected" : ""
-          }>${statusLabels[status]}</option>`
+        const options = statusOptions.map(([value, label]) =>
+          `<option value="${value}" ${
+            lead.status === value ? "selected" : ""
+          }>${label}</option>`
         ).join("");
 
         const whatsappLink = wa(lead.whatsapp);
 
-        const originLabel =
-          lead.origem === "bio_instagram"
-            ? "Bio Instagram"
-            : lead.origem === "site_principal"
-              ? "Site principal"
-              : esc(lead.origem);
+        let originLabel = esc(lead.origem);
+
+        if (lead.origem === "site_principal") {
+          originLabel = "Site principal";
+        } else if (lead.origem === "bio_instagram") {
+          originLabel = "Bio Instagram";
+        }
 
         return `
           <tr>
@@ -262,39 +278,51 @@ function render() {
             <td>${date(lead.criado_em)}</td>
             <td>
               <button class="action-button"
-                data-save-id="${Number(lead.id)}">Salvar</button>
+                data-save-id="${Number(lead.id)}"
+                type="button">Salvar</button>
             </td>
           </tr>
         `;
       }).join("")
-    : `<tr><td colspan="6" class="empty">
-         Nenhum lead encontrado.
-       </td></tr>`;
+    : `<tr><td colspan="6" class="empty">Nenhum lead encontrado.</td></tr>`;
 }
 
 async function load() {
+  if (!db || loading) return;
+
+  loading = true;
   $("data-message").textContent = "Carregando leads...";
 
-  const { data, error } = await db
-    .from("leads")
-    .select("id,nome,whatsapp,origem,status,criado_em")
-    .order("criado_em", { ascending: false });
+  try {
+    const { data, error } = await db
+      .from("leads")
+      .select("id,nome,whatsapp,origem,status,criado_em")
+      .order("criado_em", { ascending: false });
 
-  if (error) {
+    if (error) {
+      console.error("Erro ao carregar leads:", error);
+      $("data-message").textContent =
+        "Não foi possível carregar os leads. Confira as permissões do Supabase.";
+      return;
+    }
+
+    leads = data || [];
+
+    metrics();
+    render();
+    updateCharts();
+
+    if (typeof window.Chart !== "undefined") {
+      $("data-message").textContent =
+        `Dados atualizados: ${leads.length} lead(s).`;
+    }
+  } catch (error) {
+    console.error("Erro inesperado ao carregar dados:", error);
     $("data-message").textContent =
-      "Não foi possível carregar os leads. Confira a conexão e as políticas de acesso do Supabase.";
-    console.error("Erro ao carregar leads:", error);
-    return;
+      "Ocorreu um erro ao carregar os dados. Atualize a página e tente novamente.";
+  } finally {
+    loading = false;
   }
-
-  leads = data || [];
-
-  metrics();
-  updateCharts();
-  render();
-
-  $("data-message").textContent =
-    `Dados atualizados: ${leads.length} lead(s).`;
 }
 
 async function init() {
@@ -303,37 +331,36 @@ async function init() {
     return;
   }
 
-  if (!window.Chart) {
-    console.warn("Chart.js ainda não está disponível.");
-  }
-
   db = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
   );
 
-  const {
-    data: { session },
-    error: sessionError
-  } = await db.auth.getSession();
+  try {
+    const {
+      data: { session },
+      error
+    } = await db.auth.getSession();
 
-  if (sessionError) {
-    showLogin("Não foi possível verificar sua sessão. Tente novamente.");
-    console.error(sessionError);
-    return;
+    if (error) throw error;
+
+    if (session) {
+      showApp(session.user);
+      await load();
+    } else {
+      showLogin();
+    }
+  } catch (error) {
+    console.error("Erro ao verificar sessão:", error);
+    showLogin("Não foi possível verificar a sessão. Tente entrar novamente.");
   }
 
-  if (session) {
-    showApp(session.user);
-    await load();
-  } else {
-    showLogin();
-  }
-
-  db.auth.onAuthStateChange((event, sessionAtual) => {
-    if (sessionAtual) {
-      showApp(sessionAtual.user);
-      load();
+  db.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      showApp(session.user);
+      if (event !== "INITIAL_SESSION") {
+        load();
+      }
     } else {
       showLogin();
       leads = [];
@@ -360,9 +387,9 @@ async function init() {
     });
 
     if (error) {
+      console.error("Erro no login:", error);
       $("login-message").textContent =
         "Não foi possível entrar. Confira o e-mail e a senha.";
-      console.error("Erro no login:", error);
     }
   });
 
@@ -371,26 +398,21 @@ async function init() {
 
     if (error) {
       console.error("Erro ao sair:", error);
-      alert("Não foi possível encerrar a sessão. Tente novamente.");
+      alert("Não foi possível encerrar a sessão.");
     }
   });
 
   $("refresh-button").addEventListener("click", load);
   $("search-input").addEventListener("input", render);
   $("status-filter").addEventListener("change", render);
-
-  if ($("origin-filter")) {
-    $("origin-filter").addEventListener("change", render);
-  }
+  $("origin-filter").addEventListener("change", render);
 
   $("leads-table").addEventListener("click", async event => {
     const button = event.target.closest("[data-save-id]");
     if (!button) return;
 
     const id = Number(button.dataset.saveId);
-    const select = document.querySelector(
-      `[data-status-id="${id}"]`
-    );
+    const select = document.querySelector(`[data-status-id="${id}"]`);
 
     if (!select) return;
 
@@ -403,8 +425,8 @@ async function init() {
       .eq("id", id);
 
     if (error) {
-      alert("Falha ao salvar o status. Confira as permissões do Supabase.");
-      console.error("Erro ao atualizar status:", error);
+      console.error("Erro ao salvar status:", error);
+      alert("Falha ao salvar. Verifique as permissões do Supabase.");
       button.disabled = false;
       button.textContent = "Salvar";
       return;
