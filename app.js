@@ -69,6 +69,94 @@ function metrics() {
 function updateCharts() {
   const sourceCanvas = $("source-chart");
   const statusCanvas = $("status-chart");
+  const monthlyCanvas = $("monthly-chart");
+
+  
+  if (monthlyChart) {
+    monthlyChart.destroy();
+    monthlyChart = null;
+  }
+
+  if (monthlyCanvas) {
+    const today = new Date();
+    const months = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(
+        today.getFullYear(),
+        today.getMonth() - i,
+        1
+      );
+
+      months.push({
+        year: monthDate.getFullYear(),
+        month: monthDate.getMonth(),
+        label: monthDate.toLocaleDateString("pt-BR", {
+          month: "short",
+          year: "2-digit"
+        })
+      });
+    }
+
+    const monthlyData = months.map(item =>
+      leads.filter(lead => {
+        if (!lead.criado_em) return false;
+
+        const createdAt = new Date(lead.criado_em);
+
+        return (
+          !isNaN(createdAt.getTime()) &&
+          createdAt.getFullYear() === item.year &&
+          createdAt.getMonth() === item.month
+        );
+      }).length
+    );
+
+    monthlyChart = new window.Chart(monthlyCanvas, {
+      type: "line",
+      data: {
+        labels: months.map(item => item.label),
+        datasets: [{
+          label: "Leads recebidos",
+          data: monthlyData,
+          borderColor: "#805846",
+          backgroundColor: "rgba(128, 88, 70, 0.15)",
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              stepSize: 1
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                return `${context.raw} lead(s)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+
+  
 
   if (!sourceCanvas || !statusCanvas) {
     console.error("Os elementos canvas dos gráficos não foram encontrados.");
