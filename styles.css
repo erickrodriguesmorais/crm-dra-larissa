@@ -607,3 +607,292 @@ footer {
     width: 100%;
   }
 }
+
+/* ===== MELHORIAS EXCLUSIVAS PARA CELULAR ===== */
+
+@media (max-width: 600px) {
+  html {
+    scroll-padding-top: 12px;
+  }
+
+  body {
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+
+  .layout {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Menu mais compacto */
+  aside {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 12px;
+  }
+
+  .brand {
+    width: 100%;
+    gap: 10px;
+    margin: 0 0 8px;
+  }
+
+  .brand .mark.small {
+    width: 40px;
+    height: 40px;
+    font-size: 19px;
+  }
+
+  .brand b {
+    font-size: 15px;
+  }
+
+  aside a {
+    flex: 1 1 auto;
+    padding: 11px 9px;
+    border-radius: 10px;
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .logout {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  /* Conteúdo */
+  main {
+    width: 100%;
+    min-width: 0;
+    padding: 22px 14px 18px;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  header h1 {
+    font-size: 32px;
+    line-height: 1.15;
+  }
+
+  header .muted {
+    font-size: 14px;
+  }
+
+  .tools {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+  }
+
+  #user-email {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .tools button {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  /* Indicadores em duas colunas */
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .metrics article {
+    padding: 15px 12px;
+    border-radius: 15px;
+  }
+
+  .metrics article > span {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .metrics article p {
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .metrics article strong {
+    margin-bottom: 5px;
+    font-size: 28px;
+  }
+
+  .metrics article small {
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Gráficos */
+  .analytics-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin: 18px 0;
+  }
+
+  .panel {
+    min-width: 0;
+    padding: 17px 13px;
+    border-radius: 16px;
+  }
+
+  .chart-panel {
+    width: 100%;
+  }
+
+  .panel-head {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 13px;
+    margin-bottom: 12px;
+  }
+
+  .panel h2 {
+    font-size: 21px;
+    line-height: 1.25;
+  }
+
+  .panel-head .muted {
+    font-size: 13px;
+  }
+
+  .chart-area {
+    width: 100%;
+    height: 235px;
+    min-height: 0;
+    margin-top: 10px;
+  }
+
+  .chart-area canvas {
+    max-width: 100%;
+  }
+
+  /* Filtros */
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    width: 100%;
+  }
+
+  .filters input,
+  .filters select {
+    width: 100%;
+    min-width: 0;
+    min-height: 45px;
+  }
+
+  /* Tabela com rolagem horizontal */
+  .table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  table {
+    min-width: 720px;
+  }
+
+  th,
+  td {
+    padding: 12px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .status-select {
+    min-width: 120px;
+    min-height: 40px;
+  }
+
+  .action-button {
+    min-height: 40px;
+    padding: 9px 12px;
+  }
+
+  .notice {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  footer {
+    padding: 20px 0 8px;
+    font-size: 11px;
+  }
+
+  /* Tela de login */
+  .login-shell {
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 430px;
+    padding: 25px 20px;
+    border-radius: 18px;
+  }
+
+  .login-card h1 {
+    font-size: 28px;
+  }
+
+  .login-card input,
+  .login-card button {
+    min-height: 46px;
+  }
+}
+
+/* Celulares muito estreitos */
+@media (max-width: 360px) {
+  main {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .metrics {
+    gap: 8px;
+  }
+
+  .metrics article {
+    padding: 12px 9px;
+  }
+
+  .metrics article strong {
+    font-size: 25px;
+  }
+
+  aside a {
+    font-size: 12px;
+    padding: 10px 6px;
+  }
+
+  .chart-area {
+    height: 210px;
+  }
+}
