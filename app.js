@@ -11,6 +11,8 @@ let loadingGoogle = false;
 let selectedPeriod = 30;
 let googleData = null;
 let googleTrendChart = null;
+let googleDeviceChart = null;
+let googleHoursChart = null;
 
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
@@ -133,23 +135,51 @@ function leadsInPeriod(days) {
   return leads.filter(l => { const d = new Date(l.criado_em); return !Number.isNaN(d.getTime()) && d >= start && d <= end; });
 }
 function renderGoogleTrend(data) {
-  const canvas = $("google-trend-chart"); if (!canvas || !window.Chart) return;
-  googleTrendChart?.destroy(); const rows = data.daily || [];
-  googleTrendChart = new Chart(canvas, { type:"line", data:{ labels:rows.map(x=>x.dateLabel), datasets:[
-    {label:"Usuários",data:rows.map(x=>x.users),borderColor:"#8aaf9b",backgroundColor:"rgba(138,175,155,.12)",tension:.3,pointRadius:rows.length>40?0:2},
-    {label:"Visualizações",data:rows.map(x=>x.pageViews),borderColor:"#805846",backgroundColor:"rgba(128,88,70,.08)",tension:.3,pointRadius:rows.length>40?0:2},
-    {label:"Cliques para agendamento",data:rows.map(x=>x.bookingClicks),borderColor:"#dba1c2",backgroundColor:"rgba(219,161,194,.08)",tension:.3,pointRadius:rows.length>40?0:2}
-  ]}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom",labels:{usePointStyle:true,boxWidth:8,padding:12}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}`}}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{ticks:{maxTicksLimit:7,maxRotation:0}}}} });
+  const canvas=$("google-trend-chart"); if(!canvas||!window.Chart)return;
+  googleTrendChart?.destroy();
+  const series=data.daily||[];
+  googleTrendChart=new Chart(canvas,{type:"line",data:{labels:series.map(x=>x.dateLabel),datasets:[
+    {label:"Usuários",data:series.map(x=>x.users),borderColor:"#8aaf9b",backgroundColor:"rgba(138,175,155,.12)",tension:.3,pointRadius:series.length>40?0:2},
+    {label:"Visualizações",data:series.map(x=>x.pageViews),borderColor:"#cfae98",backgroundColor:"rgba(207,174,152,.08)",tension:.3,pointRadius:series.length>40?0:2},
+    {label:"Cliques agendamento",data:series.map(x=>x.bookingClicks),borderColor:"#df8eae",backgroundColor:"rgba(223,142,174,.08)",tension:.3,pointRadius:series.length>40?0:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom",labels:{usePointStyle:true,boxWidth:9,padding:12}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}`}}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{ticks:{maxTicksLimit:7,maxRotation:0}}}}});
+}
+function renderTopPages(pages) {
+  const el=$("google-top-pages"); if(!el)return;
+  if(!pages?.length){el.innerHTML='<p class="muted">O GA4 não retornou dados de páginas para este período.</p>';return;}
+  const max=Math.max(...pages.map(x=>Number(x.views)||0),1);
+  el.innerHTML=pages.slice(0,5).map((p,i)=>`<div class="ranked-row"><span class="rank-number">${i+1}</span><span class="rank-name" title="${esc(p.title||p.path)}">${esc(p.title||p.path||"Página sem título")}<small>${esc(p.path||"")}</small></span><strong>${formatNumber(p.views)}</strong><span class="rank-track"><i style="width:${Math.max(2,Number(p.views||0)/max*100)}%"></i></span></div>`).join("");
+}
+function renderTrafficSources(sources) {
+  const el=$("google-traffic-sources"); if(!el)return;
+  if(!sources?.length){el.innerHTML='<p class="muted">O GA4 não retornou origens para este período.</p>';return;}
+  const total=sources.reduce((s,x)=>s+Number(x.users||0),0)||1;
+  const icons={"Organic Search":"G","Organic Social":"◎","Direct":"↗","Referral":"↗","Paid Search":"$","Email":"✉"};
+  el.innerHTML=sources.slice(0,5).map(s=>{const name=s.name||"Outros",pct=Number(s.users||0)/total*100;return `<div class="source-row"><span class="source-mark">${esc(icons[name]||"•")}</span><span class="source-name">${esc(name)}</span><strong>${pct.toLocaleString("pt-BR",{maximumFractionDigits:1})}%</strong><span class="source-track"><i style="width:${Math.max(2,pct)}%"></i></span></div>`;}).join("");
+}
+function renderDevices(devices) {
+  const el=$("google-devices"); if(!el)return;
+  const labels={"mobile":"Celular","desktop":"Computador","tablet":"Tablet"}, colors=["#8aaf9b","#cfae98","#df8eae"];
+  if(!devices?.length){el.innerHTML='<p class="muted">O GA4 não retornou dados de dispositivos para este período.</p>';return;}
+  const total=devices.reduce((s,x)=>s+Number(x.users||0),0);
+  $("google-device-total").textContent=formatNumber(total); googleDeviceChart?.destroy();
+  googleDeviceChart=new Chart($("google-device-chart"),{type:"doughnut",data:{labels:devices.map(d=>labels[d.name]||d.name),datasets:[{data:devices.map(d=>d.users),backgroundColor:devices.map((_,i)=>colors[i%colors.length]),borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${formatNumber(ctx.parsed)} usuários`}}}}});
+  el.innerHTML=devices.map((d,i)=>{const pct=total?Number(d.users||0)/total*100:0;return `<div class="device-row"><span class="device-dot" style="background:${colors[i%colors.length]}"></span><span>${esc(labels[d.name]||d.name)}</span><strong>${pct.toLocaleString("pt-BR",{maximumFractionDigits:1})}%</strong></div>`;}).join("");
+}
+function renderHours(hours) {
+  const canvas=$("google-hours-chart"); if(!canvas||!window.Chart)return;
+  googleHoursChart?.destroy();
+  const values=Array.from({length:24},(_,h)=>{const found=(hours||[]).find(x=>Number(x.hour)===h);return found?Number(found.sessions||0):0;});
+  googleHoursChart=new Chart(canvas,{type:"bar",data:{labels:Array.from({length:24},(_,h)=>`${h}h`),datasets:[{data:values,backgroundColor:values.map(() => "#8aaf9b"),borderRadius:2,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Sessões: ${formatNumber(ctx.parsed.y)}`}}},scales:{y:{display:false,beginAtZero:true},x:{grid:{display:false},ticks:{autoSkip:false,callback:(value,index)=>index%3===0?`${index}h`:"",maxRotation:0}}}}});
 }
 function renderFunnel() {
-  if (!googleData) return;
-  const users=Number(googleData.users||0), clicks=Number(googleData.bookingClicks||0), count=leadsInPeriod(selectedPeriod).length;
-  $("funnel-users").textContent=formatNumber(users); $("funnel-clicks").textContent=formatNumber(clicks); $("funnel-leads").textContent=formatNumber(count);
-  const clickRate=users?clicks/users*100:0, leadRate=users?count/users*100:0;
-  $("funnel-clicks-bar").style.width=`${Math.min(clickRate,100)}%`; $("funnel-leads-bar").style.width=`${Math.min(leadRate,100)}%`;
-  $("funnel-clicks-rate").textContent=users?`${clickRate.toLocaleString("pt-BR",{maximumFractionDigits:1})}% de cliques por usuário; não representa consultas realizadas.`:"Sem usuários no período para calcular a taxa.";
-  $("funnel-leads-rate").textContent=users?`${leadRate.toLocaleString("pt-BR",{maximumFractionDigits:1})}% de leads em relação aos usuários.`:"Sem usuários no período para calcular a taxa.";
-  $("google-insight").textContent=users===0?"Ainda não há usuários registrados nesse período.":clickRate>10?"Há um volume relevante de cliques de agendamento em relação aos usuários. Compare esse dado com os leads e os agendamentos confirmados.":"Acompanhe a evolução dos usuários, cliques e leads. Compare os períodos para entender melhor quais ações geram contatos.";
+  if(!googleData)return;
+  const users=Number(googleData.users||0),clicks=Number(googleData.bookingClicks||0),periodLeads=leadsInPeriod(selectedPeriod).length;
+  $("funnel-users").textContent=formatNumber(users); $("funnel-clicks").textContent=formatNumber(clicks); $("funnel-leads").textContent=formatNumber(periodLeads);
+  const clickRate=users?clicks/users*100:0,leadRate=users?periodLeads/users*100:0;
+  $("funnel-clicks-rate-short").textContent=users?`${clickRate.toLocaleString("pt-BR",{maximumFractionDigits:1})}%`:"—";
+  $("funnel-leads-rate-short").textContent=users?`${leadRate.toLocaleString("pt-BR",{maximumFractionDigits:1})}%`:"—";
+  $("google-insight").textContent=users===0?"Ainda não há usuários registrados nesse período.":"Compare as páginas mais visitadas e os canais de origem com os cliques para agendamento e os leads registrados no CRM.";
 }
 async function loadGoogleMetrics() {
   if (!db || loadingGoogle) return;
@@ -166,7 +196,7 @@ async function loadGoogleMetrics() {
     const periodLabel=selectedPeriod===90?"3 meses":`${selectedPeriod} dias`;
     $("google-users-note").textContent=periodLabel; $("google-pageviews-note").textContent=periodLabel;
     $("google-data-message").textContent=`Métricas atualizadas · ${data.period?.startDate||"início do período"} até ${data.period?.endDate||"ontem"}.`;
-    renderGoogleTrend(data); renderFunnel();
+    renderGoogleTrend(data); renderFunnel(); renderTopPages(data.topPages||[]); renderTrafficSources(data.trafficSources||[]); renderDevices(data.devices||[]); renderHours(data.hours||[]);
   } catch(e) { console.error("Erro ao carregar Google Analytics:",e); $("google-data-message").textContent=`Erro ao carregar métricas: ${e.message||"consulte os logs da função no Supabase"}`; }
   finally { loadingGoogle=false; if(button)button.disabled=false; }
 }

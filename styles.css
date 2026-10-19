@@ -1059,3 +1059,71 @@ footer {
 .google-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:20px 0}.google-summary .metric-card{min-width:0;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}.google-summary .metric-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:#f1e5d7;color:var(--primary);margin-bottom:12px;font-size:20px}.google-summary .metric-card:nth-child(2) .metric-icon{background:#e2f0e8;color:#568a72}.google-summary .metric-card:nth-child(3) .metric-icon{background:#f6e3ed;color:#b05f91}.google-summary .metric-card p{margin:0 0 8px;color:var(--muted);line-height:1.4}.google-summary .metric-card strong{display:block;font-size:clamp(25px,2.5vw,36px);overflow-wrap:anywhere}.google-summary .metric-card small{display:block;margin-top:6px;line-height:1.4}.google-trend-panel{margin-bottom:18px}.google-trend-chart{position:relative;width:100%;height:300px}.google-lower-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:18px;margin:18px 0}.funnel-steps{display:grid;gap:12px;margin-top:18px}.funnel-step{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.funnel-label{font-weight:600}.funnel-count{font-family:Georgia,'Times New Roman',serif;font-size:23px;font-weight:700}.funnel-track{grid-column:1/-1;height:10px;overflow:hidden;background:#f0e9e1;border-radius:999px}.funnel-fill{height:100%;border-radius:inherit;background:var(--green);transition:width .25s ease}.funnel-step:nth-child(2) .funnel-fill{background:var(--pink)}.funnel-step:nth-child(3) .funnel-fill{background:var(--primary)}.funnel-rate{grid-column:1/-1;color:var(--muted);font-size:12px;margin-top:-6px}.google-note{padding:12px 14px;background:#f7f1e9;border-radius:12px;color:var(--muted);font-size:13px;line-height:1.5;margin-top:18px}
 @media(max-width:900px){.google-lower-grid{grid-template-columns:1fr}}
 @media(max-width:600px){#google-view .google-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#google-view .google-summary .metric-card{padding:14px 12px;border-radius:15px}#google-view .google-summary .metric-card:last-child{grid-column:1/-1}#google-view .google-summary .metric-card strong{font-size:28px}#google-view .google-summary .metric-card p{font-size:12px}.google-period{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.google-period button{padding:9px 5px;font-size:12px}.google-trend-chart{height:250px}.google-lower-grid{gap:12px}}
+
+
+/* Painel de métricas com layout inspirado na referência aprovada */
+.google-period-control{margin-top:18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;max-width:620px;padding:12px 14px;background:#f8f3ed;border:1px solid var(--border);border-radius:14px}
+.google-period-control label{color:var(--muted);font-size:13px}
+.google-period-control select{width:100%;min-width:0;min-height:42px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:#fffdfa;color:var(--text);font:inherit}
+.google-summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+.google-trend-panel,.google-funnel-panel,.google-pages-panel,.google-sources-panel,.google-devices-panel,.google-hours-panel,.google-insights-panel{margin:18px 0}
+.google-trend-chart{height:310px}
+.google-period-short{margin-top:16px}
+.google-period-short button{border-radius:999px}
+.funnel-compact{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:18px 0 14px}
+.funnel-compact-item{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:8px;border-right:1px solid var(--border);min-width:0}
+.funnel-compact-item:last-child{border-right:0}
+.funnel-compact-item strong{font-family:Georgia,"Times New Roman",serif;font-size:clamp(24px,3vw,34px)}
+.funnel-compact-item span{font-size:13px;line-height:1.35}
+.mini-people,.mini-clicks,.mini-docs{font-size:21px;letter-spacing:2px;color:var(--green)}
+.mini-clicks{color:#d98aaa}.mini-docs{color:#c5a28c}
+.funnel-conversion-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.funnel-conversion-row>div{padding:12px 8px;text-align:center;background:#e8efe8;border-radius:10px}
+.funnel-conversion-row>div:nth-child(2){background:#f1e8df}
+.funnel-conversion-row strong,.funnel-conversion-row span{display:block}
+.funnel-conversion-row strong{font-size:20px}.funnel-conversion-row span{color:var(--muted);font-size:12px}
+.ranked-list,.source-list,.device-legend{display:grid;gap:12px;margin-top:18px}
+.ranked-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center}
+.rank-number{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#f1e5d7;font-weight:700}
+.rank-name{min-width:0;overflow-wrap:anywhere;font-size:14px}.rank-name small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.ranked-row>strong{font-size:14px;font-variant-numeric:tabular-nums}
+.rank-track{grid-column:2/4;display:block;height:8px;background:#f0ebe5;border-radius:999px;overflow:hidden}
+.rank-track i,.source-track i{display:block;height:100%;border-radius:inherit;background:#9bb8a9}
+.source-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center}
+.source-mark{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#f1e5d7;font-weight:700}
+.source-name{font-size:14px;overflow-wrap:anywhere}.source-row>strong{font-size:13px}
+.source-track{grid-column:2/4;display:block;height:8px;background:#f0ebe5;border-radius:999px;overflow:hidden}
+.device-layout{display:grid;grid-template-columns:minmax(150px,.9fr) minmax(0,1.1fr);gap:18px;align-items:center;margin-top:12px}
+.device-donut-wrap{position:relative;height:210px;min-width:0}
+.device-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.device-donut-center strong{font-family:Georgia,"Times New Roman",serif;font-size:25px}.device-donut-center span{font-size:12px;color:var(--muted)}
+.device-row{display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:13px}
+.device-row strong{font-variant-numeric:tabular-nums}.device-dot{width:10px;height:10px;border-radius:50%}
+.google-hours-chart{height:190px}
+.insight-list{display:grid;margin-top:12px}
+.insight-item{display:grid;grid-template-columns:36px minmax(0,1fr) 18px;gap:10px;align-items:center;width:100%;padding:12px 0;text-align:left;border:0;border-top:1px solid var(--border);background:transparent;color:var(--text);font:inherit;cursor:pointer}
+.insight-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#f1e5d7;color:var(--primary)}
+.insight-chevron{font-size:25px;color:var(--muted)}.insight-detail{padding:10px 12px;background:#f8f3ed;border-radius:10px}
+@media(min-width:1100px){
+#google-view{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+#google-view.hidden{display:none!important}
+#google-view>.google-intro,#google-view>.google-summary,#google-view>.google-trend-panel,#google-view>.google-funnel-panel{grid-column:1}
+#google-view>.google-pages-panel,#google-view>.google-sources-panel,#google-view>.google-devices-panel,#google-view>.google-hours-panel,#google-view>.google-insights-panel{grid-column:2}
+#google-view>.google-intro{grid-row:1}#google-view>.google-summary{grid-row:2}#google-view>.google-trend-panel{grid-row:3}#google-view>.google-funnel-panel{grid-row:4}
+#google-view>.google-pages-panel{grid-row:1}#google-view>.google-sources-panel{grid-row:2}#google-view>.google-devices-panel{grid-row:3}#google-view>.google-hours-panel{grid-row:4}#google-view>.google-insights-panel{grid-row:5}
+}
+@media(max-width:600px){
+#google-view{display:block}
+#google-view .google-summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#google-view .google-summary .metric-card{padding:12px 10px;border-radius:15px}
+#google-view .google-summary .metric-card strong{font-size:25px}
+#google-view .google-summary .metric-card p{font-size:12px;line-height:1.35}
+#google-view .google-summary .metric-card small{font-size:11px}
+#google-view .metric-icon{width:36px;height:36px;margin-bottom:10px}
+.google-period-control{grid-template-columns:1fr;gap:6px}
+.google-trend-chart{height:250px}
+.funnel-compact-item{padding:6px 3px}.funnel-compact-item strong{font-size:25px}.funnel-compact-item span{font-size:11px}
+.mini-people,.mini-clicks,.mini-docs{font-size:15px;letter-spacing:0}
+.device-layout{grid-template-columns:minmax(120px,.9fr) minmax(0,1.1fr);gap:10px}
+.device-donut-wrap{height:165px}.device-row{font-size:12px;gap:5px}.google-hours-chart{height:160px}
+}
