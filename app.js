@@ -541,6 +541,7 @@ async function init() {
   });
 
   $("refresh-button").addEventListener("click", load);
+  $("refresh-google-button").addEventListener("click", loadGoogleMetrics);
   $("search-input").addEventListener("input", render);
   $("status-filter").addEventListener("change", render);
   $("origin-filter").addEventListener("change", render);
