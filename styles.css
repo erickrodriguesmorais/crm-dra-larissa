@@ -1127,3 +1127,86 @@ footer {
 .device-layout{grid-template-columns:minmax(120px,.9fr) minmax(0,1.1fr);gap:10px}
 .device-donut-wrap{height:165px}.device-row{font-size:12px;gap:5px}.google-hours-chart{height:160px}
 }
+
+/* Card de origem dos usuários — estilo da referência */
+.google-sources-panel {
+  padding: 30px 32px;
+  border-radius: 24px;
+  background: #fffdfa;
+}
+
+.google-sources-panel .panel-head {
+  margin-bottom: 22px;
+}
+
+.google-sources-panel .panel-head .eyebrow {
+  margin-bottom: 5px;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.google-sources-panel .panel-head h2 {
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.2;
+}
+
+.google-sources-panel .source-list {
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.google-sources-panel .source-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px 14px;
+  align-items: center;
+}
+
+.google-sources-panel .source-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1e5d7;
+  color: #674433;
+  font-size: 17px;
+}
+
+.google-sources-panel .source-name {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.google-sources-panel .source-row > strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.google-sources-panel .source-track {
+  grid-column: 2 / 4;
+  height: 10px;
+  border-radius: 999px;
+  background: #f0ebe5;
+  overflow: hidden;
+}
+
+.google-sources-panel .source-track i {
+  min-width: 0;
+  background: #9bb8a9;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 600px) {
+  .google-sources-panel {
+    padding: 22px 18px;
+  }
+
+  .google-sources-panel .panel-head h2 {
+    font-size: 24px;
+  }
+
+  .google-sources-panel .source-name,
+  .google-sources-panel .source-row > strong {
+    font-size: 14px;
+  }
+}
