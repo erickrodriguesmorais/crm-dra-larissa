@@ -8,6 +8,9 @@ let statusChart = null;
 let monthlyChart = null;
 let loadingLeads = false;
 let loadingGoogle = false;
+let selectedPeriod = 30;
+let googleData = null;
+let googleTrendChart = null;
 
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({
@@ -117,42 +120,55 @@ async function loadLeads() {
   try {
     const { data, error } = await db.from("leads").select("id,nome,whatsapp,origem,status,criado_em").order("criado_em", { ascending: false });
     if (error) throw error;
-    leads = data || []; updateLeadMetrics(); renderLeads(); updateCharts();
+    leads = data || []; updateLeadMetrics(); renderLeads(); updateCharts(); if (googleData) renderFunnel();
     $("data-message").textContent = `Dados atualizados: ${leads.length} lead(s).`;
   } catch (e) {
     console.error("Erro ao carregar leads:", e);
     $("data-message").textContent = "Não foi possível carregar os leads. Confira as permissões do Supabase.";
   } finally { loadingLeads = false; }
 }
+function leadsInPeriod(days) {
+  const end = new Date(); end.setHours(0,0,0,0);
+  const start = new Date(end); start.setDate(start.getDate() - days);
+  return leads.filter(l => { const d = new Date(l.criado_em); return !Number.isNaN(d.getTime()) && d >= start && d <= end; });
+}
+function renderGoogleTrend(data) {
+  const canvas = $("google-trend-chart"); if (!canvas || !window.Chart) return;
+  googleTrendChart?.destroy(); const rows = data.daily || [];
+  googleTrendChart = new Chart(canvas, { type:"line", data:{ labels:rows.map(x=>x.dateLabel), datasets:[
+    {label:"Usuários",data:rows.map(x=>x.users),borderColor:"#8aaf9b",backgroundColor:"rgba(138,175,155,.12)",tension:.3,pointRadius:rows.length>40?0:2},
+    {label:"Visualizações",data:rows.map(x=>x.pageViews),borderColor:"#805846",backgroundColor:"rgba(128,88,70,.08)",tension:.3,pointRadius:rows.length>40?0:2},
+    {label:"Cliques para agendamento",data:rows.map(x=>x.bookingClicks),borderColor:"#dba1c2",backgroundColor:"rgba(219,161,194,.08)",tension:.3,pointRadius:rows.length>40?0:2}
+  ]}, options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom",labels:{usePointStyle:true,boxWidth:8,padding:12}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}`}}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{ticks:{maxTicksLimit:7,maxRotation:0}}}} });
+}
+function renderFunnel() {
+  if (!googleData) return;
+  const users=Number(googleData.users||0), clicks=Number(googleData.bookingClicks||0), count=leadsInPeriod(selectedPeriod).length;
+  $("funnel-users").textContent=formatNumber(users); $("funnel-clicks").textContent=formatNumber(clicks); $("funnel-leads").textContent=formatNumber(count);
+  const clickRate=users?clicks/users*100:0, leadRate=users?count/users*100:0;
+  $("funnel-clicks-bar").style.width=`${Math.min(clickRate,100)}%`; $("funnel-leads-bar").style.width=`${Math.min(leadRate,100)}%`;
+  $("funnel-clicks-rate").textContent=users?`${clickRate.toLocaleString("pt-BR",{maximumFractionDigits:1})}% de cliques por usuário; não representa consultas realizadas.`:"Sem usuários no período para calcular a taxa.";
+  $("funnel-leads-rate").textContent=users?`${leadRate.toLocaleString("pt-BR",{maximumFractionDigits:1})}% de leads em relação aos usuários.`:"Sem usuários no período para calcular a taxa.";
+  $("google-insight").textContent=users===0?"Ainda não há usuários registrados nesse período.":clickRate>10?"Há um volume relevante de cliques de agendamento em relação aos usuários. Compare esse dado com os leads e os agendamentos confirmados.":"Acompanhe a evolução dos usuários, cliques e leads. Compare os períodos para entender melhor quais ações geram contatos.";
+}
 async function loadGoogleMetrics() {
   if (!db || loadingGoogle) return;
-  loadingGoogle = true;
-  const button = $("refresh-google-button");
-  button.disabled = true;
+  loadingGoogle = true; const button = $("refresh-google-button"); if (button) button.disabled = true;
   $("google-data-message").textContent = "Consultando o Google Analytics...";
   try {
-    const { data, error } = await db.functions.invoke("google-analytics-metrics", { method: "GET" });
-    if (error) {
-      let message = error.message || "Não foi possível chamar a função.";
-      try {
-        const response = error.context;
-        if (response && typeof response.json === "function") {
-          const body = await response.json();
-          if (body?.error) message = body.error;
-        }
-      } catch (_) {}
-      throw new Error(message);
-    }
-    if (!data || data.error) throw new Error(data?.error || "A função não retornou dados.");
-    $("google-users").textContent = formatNumber(data.users);
-    $("google-pageviews").textContent = formatNumber(data.pageViews);
-    $("google-booking-clicks").textContent = data.bookingClicks == null ? "—" : formatNumber(data.bookingClicks);
-    $("google-booking-note").textContent = data.bookingEventName ? `Evento GA4: ${data.bookingEventName}` : "Configure o evento de agendamento no GA4 para medir os cliques.";
-    $("google-data-message").textContent = `Métricas atualizadas. Período: ${data.period?.startDate || "30daysAgo"} até ${data.period?.endDate || "yesterday"}.`;
-  } catch (e) {
-    console.error("Erro ao carregar Google Analytics:", e);
-    $("google-data-message").textContent = `Erro ao carregar métricas: ${e.message || "consulte os logs da função no Supabase"}`;
-  } finally { loadingGoogle = false; button.disabled = false; }
+    const { data, error } = await db.functions.invoke("google-analytics-metrics", { method:"GET", headers:{"x-report-days":String(selectedPeriod)} });
+    if (error) { let message=error.message||"Não foi possível chamar a função."; try { const r=error.context; if(r&&typeof r.json==="function"){const body=await r.json();if(body?.error)message=body.error;} } catch(_){} throw new Error(message); }
+    if (!data || data.error) throw new Error(data?.error||"A função não retornou dados.");
+    googleData=data;
+    $("google-users").textContent=formatNumber(data.users); $("google-pageviews").textContent=formatNumber(data.pageViews);
+    $("google-booking-clicks").textContent=data.bookingClicks==null?"—":formatNumber(data.bookingClicks);
+    $("google-booking-note").textContent=data.bookingEventName?`Evento GA4: ${data.bookingEventName}`:"Evento de agendamento não configurado.";
+    const periodLabel=selectedPeriod===90?"3 meses":`${selectedPeriod} dias`;
+    $("google-users-note").textContent=periodLabel; $("google-pageviews-note").textContent=periodLabel;
+    $("google-data-message").textContent=`Métricas atualizadas · ${data.period?.startDate||"início do período"} até ${data.period?.endDate||"ontem"}.`;
+    renderGoogleTrend(data); renderFunnel();
+  } catch(e) { console.error("Erro ao carregar Google Analytics:",e); $("google-data-message").textContent=`Erro ao carregar métricas: ${e.message||"consulte os logs da função no Supabase"}`; }
+  finally { loadingGoogle=false; if(button)button.disabled=false; }
 }
 async function init() {
   if (!window.supabase) { showLogin("A biblioteca do Supabase não carregou. Confira a conexão."); return; }
@@ -169,7 +185,7 @@ async function init() {
     if (session) { showApp(session.user); if (event !== "INITIAL_SESSION") loadLeads(); }
     else {
       showLogin(); leads = [];
-      sourceChart?.destroy(); sourceChart = null; statusChart?.destroy(); statusChart = null; monthlyChart?.destroy(); monthlyChart = null;
+      sourceChart?.destroy(); sourceChart = null; statusChart?.destroy(); statusChart = null; monthlyChart?.destroy(); monthlyChart = null; googleTrendChart?.destroy(); googleTrendChart = null; googleData = null;
     }
   });
   $("login-form").addEventListener("submit", async event => {
@@ -183,6 +199,11 @@ async function init() {
   });
   $("refresh-button").addEventListener("click", loadLeads);
   $("refresh-google-button").addEventListener("click", loadGoogleMetrics);
+  document.querySelectorAll("[data-period]").forEach(button => button.addEventListener("click", () => {
+    const days = Number(button.dataset.period); if (days === selectedPeriod) return; selectedPeriod = days;
+    document.querySelectorAll("[data-period]").forEach(b => b.setAttribute("aria-pressed", String(Number(b.dataset.period) === selectedPeriod)));
+    loadGoogleMetrics();
+  }));
   $("search-input").addEventListener("input", renderLeads);
   $("status-filter").addEventListener("change", renderLeads);
   $("origin-filter").addEventListener("change", renderLeads);

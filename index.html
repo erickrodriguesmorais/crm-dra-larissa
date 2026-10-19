@@ -96,16 +96,31 @@
 
       <div id="google-view" class="tab-content hidden">
         <section class="panel google-intro">
-          <p class="eyebrow">DESEMPENHO DIGITAL</p>
-          <h2>Métricas do Google</h2>
-          <p class="muted">Resultados do site nos últimos 30 dias completos.</p>
+          <p class="eyebrow">DESEMPENHO DIGITAL</p><h2>Métricas do Google</h2>
+          <p class="muted">Acompanhe acessos, interesse em agendar e leads no período escolhido.</p>
+          <div class="google-period" role="group" aria-label="Período das métricas">
+            <button type="button" data-period="7" aria-pressed="false">7 dias</button>
+            <button type="button" data-period="30" aria-pressed="true">30 dias</button>
+            <button type="button" data-period="90" aria-pressed="false">3 meses</button>
+          </div>
           <button id="refresh-google-button" class="secondary" type="button">Atualizar métricas</button>
           <p id="google-data-message" class="notice" role="status" aria-live="polite">As métricas ainda não foram carregadas.</p>
         </section>
-        <section class="metrics google-metrics">
-          <article><span>◎</span><p>Usuários do site</p><strong id="google-users">—</strong><small>Últimos 30 dias</small></article>
-          <article><span>▤</span><p>Visualizações de páginas</p><strong id="google-pageviews">—</strong><small>Últimos 30 dias</small></article>
-          <article><span>↗</span><p>Cliques para agendamento</p><strong id="google-booking-clicks">—</strong><small id="google-booking-note">Depende da configuração do evento no GA4</small></article>
+        <section class="google-summary">
+          <article class="metric-card"><span class="metric-icon">◎</span><p>Usuários do site</p><strong id="google-users">—</strong><small id="google-users-note">Período selecionado</small></article>
+          <article class="metric-card"><span class="metric-icon">▤</span><p>Visualizações de páginas</p><strong id="google-pageviews">—</strong><small id="google-pageviews-note">Período selecionado</small></article>
+          <article class="metric-card"><span class="metric-icon">↗</span><p>Cliques para agendamento</p><strong id="google-booking-clicks">—</strong><small id="google-booking-note">Evento GA4 configurado</small></article>
+        </section>
+        <section class="panel google-trend-panel"><div class="panel-head"><div><h2>Evolução dos acessos</h2><p class="muted">Toque nos pontos para consultar os valores por dia.</p></div></div><div class="google-trend-chart"><canvas id="google-trend-chart" aria-label="Gráfico diário de usuários, visualizações e cliques"></canvas></div></section>
+        <section class="google-lower-grid">
+          <article class="panel"><div class="panel-head"><div><h2>Funil de interesse</h2><p class="muted">Acessos, cliques e leads no período.</p></div></div>
+            <div class="funnel-steps">
+              <div class="funnel-step"><span class="funnel-label">Usuários do site</span><strong class="funnel-count" id="funnel-users">—</strong><div class="funnel-track"><div class="funnel-fill" id="funnel-users-bar" style="width:100%"></div></div><small class="funnel-rate">Base de comparação do período</small></div>
+              <div class="funnel-step"><span class="funnel-label">Cliques para agendamento</span><strong class="funnel-count" id="funnel-clicks">—</strong><div class="funnel-track"><div class="funnel-fill" id="funnel-clicks-bar" style="width:0%"></div></div><small class="funnel-rate" id="funnel-clicks-rate">—</small></div>
+              <div class="funnel-step"><span class="funnel-label">Leads registrados no CRM</span><strong class="funnel-count" id="funnel-leads">—</strong><div class="funnel-track"><div class="funnel-fill" id="funnel-leads-bar" style="width:0%"></div></div><small class="funnel-rate" id="funnel-leads-rate">—</small></div>
+            </div><p class="google-note">Cliques não equivalem a consultas realizadas. Uma pessoa pode clicar mais de uma vez, e leads podem vir de outros canais.</p>
+          </article>
+          <article class="panel"><div class="panel-head"><div><h2>Como interpretar</h2><p class="muted">Indicadores para decisões práticas.</p></div></div><p id="google-insight" class="muted">Selecione um período para visualizar os dados.</p><p class="google-note">Os dados do GA4 terminam em ontem. Os leads são contabilizados pela data de cadastro no CRM.</p></article>
         </section>
       </div>
       <footer>CRM de gestão de leads · Dra. Larissa Lima</footer>
