@@ -1210,3 +1210,23 @@ footer {
     font-size: 14px;
   }
 }
+
+/* Ícones multicoloridos das origens de tráfego */
+.google-sources-panel .source-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.google-sources-panel .source-logo {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.google-sources-panel .source-logo-instagram {
+  width: 22px;
+  height: 22px;
+}
