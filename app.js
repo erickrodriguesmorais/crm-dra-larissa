@@ -489,24 +489,67 @@ function renderTrafficSources(sources) {
     0
   ) || 1;
 
-  const icons = {
-    "Organic Search": "G",
-    "Organic Social": "◎",
-    "Direct": "↗",
-    "Referral": "↗",
-    "Paid Search": "$",
-    "Email": "✉"
-  };
+  function sourceIcon(name) {
+    const normalized = String(name || "").toLowerCase().trim();
+
+    if (normalized.includes("google")) {
+      return `<img
+        src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png"
+        alt="Google"
+        class="source-logo"
+        loading="lazy"
+      >`;
+    }
+
+    if (normalized.includes("instagram")) {
+      return `<svg class="source-logo source-logo-instagram"
+        viewBox="0 0 24 24" role="img" aria-label="Instagram"
+        xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="instagram-gradient"
+            x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#FFDC80"/>
+            <stop offset="30%" stop-color="#FCAF45"/>
+            <stop offset="60%" stop-color="#F77737"/>
+            <stop offset="78%" stop-color="#E1306C"/>
+            <stop offset="100%" stop-color="#833AB4"/>
+          </linearGradient>
+        </defs>
+        <rect x="3" y="3" width="18" height="18" rx="5"
+          fill="none" stroke="url(#instagram-gradient)" stroke-width="2.2"/>
+        <circle cx="12" cy="12" r="4.2" fill="none"
+          stroke="url(#instagram-gradient)" stroke-width="2.2"/>
+        <circle cx="17.5" cy="6.8" r="1.25" fill="#E1306C"/>
+      </svg>`;
+    }
+
+    const symbols = {
+      "Direto": "↗",
+      "Outros": "◎",
+      "Organic Search": "↗",
+      "Organic Social": "◎",
+      "Direct": "↗",
+      "Referral": "↗",
+      "Paid Search": "$",
+      "Email": "✉"
+    };
+
+    return esc(symbols[name] || "•");
+  }
 
   el.innerHTML = sources.slice(0, 5).map(source => {
     const name = source.name || "Outros";
     const pct = Number(source.users || 0) / total * 100;
 
     return `<div class="source-row">
-      <span class="source-mark">${esc(icons[name] || "•")}</span>
+      <span class="source-mark">${sourceIcon(name)}</span>
       <span class="source-name">${esc(name)}</span>
-      <strong>${pct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</strong>
-      <span class="source-track"><i style="width:${Math.max(2, pct)}%"></i></span>
+      <strong>${pct.toLocaleString("pt-BR", {
+        maximumFractionDigits: 1
+      })}%</strong>
+      <span class="source-track">
+        <i style="width:${Math.max(2, pct)}%"></i>
+      </span>
     </div>`;
   }).join("");
 }
@@ -574,9 +617,12 @@ function renderDevices(devices) {
       : 0;
 
     return `<div class="device-row">
-      <span class="device-dot" style="background:${colors[index % colors.length]}"></span>
+      <span class="device-dot"
+        style="background:${colors[index % colors.length]}"></span>
       <span>${esc(labels[device.name] || device.name)}</span>
-      <strong>${pct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</strong>
+      <strong>${pct.toLocaleString("pt-BR", {
+        maximumFractionDigits: 1
+      })}%</strong>
     </div>`;
   }).join("");
 }
@@ -589,14 +635,20 @@ function renderHours(hours) {
   googleHoursChart?.destroy();
 
   const values = Array.from({ length: 24 }, (_, hour) => {
-    const found = (hours || []).find(item => Number(item.hour) === hour);
+    const found = (hours || []).find(
+      item => Number(item.hour) === hour
+    );
+
     return found ? Number(found.sessions || 0) : 0;
   });
 
   googleHoursChart = new Chart(canvas, {
     type: "bar",
     data: {
-      labels: Array.from({ length: 24 }, (_, hour) => `${hour}h`),
+      labels: Array.from(
+        { length: 24 },
+        (_, hour) => `${hour}h`
+      ),
       datasets: [{
         data: values,
         backgroundColor: values.map(() => "#8aaf9b"),
@@ -613,7 +665,8 @@ function renderHours(hours) {
         },
         tooltip: {
           callbacks: {
-            label: ctx => `Sessões: ${formatNumber(ctx.parsed.y)}`
+            label: ctx =>
+              `Sessões: ${formatNumber(ctx.parsed.y)}`
           }
         }
       },
@@ -628,7 +681,8 @@ function renderHours(hours) {
           },
           ticks: {
             autoSkip: false,
-            callback: (value, index) => index % 3 === 0 ? `${index}h` : "",
+            callback: (value, index) =>
+              index % 3 === 0 ? `${index}h` : "",
             maxRotation: 0
           }
         }
@@ -745,11 +799,6 @@ async function loadGoogleMetrics() {
   }
 }
 
-/*
- * CORREÇÃO DOS PERÍODOS:
- * reconhece botões por data-period, data-days ou pelo texto visível;
- * destaca o período selecionado e solicita os dados novamente.
- */
 function setupPeriodButtons() {
   const buttons = [
     ...document.querySelectorAll(
@@ -800,7 +849,6 @@ function setupPeriodButtons() {
       if (![7, 30, 90].includes(days)) return;
 
       selectedPeriod = days;
-
       updateSelectedPeriod();
 
       const periodSelect = $("google-period-select");
@@ -810,14 +858,14 @@ function setupPeriodButtons() {
       }
 
       renderFunnel();
-
       await loadGoogleMetrics();
     });
   });
 
   const periodSelect = $("google-period-select");
 
-  if (periodSelect && periodSelect.dataset.periodListenerAttached !== "true") {
+  if (periodSelect &&
+      periodSelect.dataset.periodListenerAttached !== "true") {
     periodSelect.dataset.periodListenerAttached = "true";
 
     periodSelect.addEventListener("change", async () => {
@@ -826,11 +874,8 @@ function setupPeriodButtons() {
       if (![7, 30, 90].includes(days)) return;
 
       selectedPeriod = days;
-
       updateSelectedPeriod();
-
       renderFunnel();
-
       await loadGoogleMetrics();
     });
   }
@@ -929,7 +974,7 @@ async function init() {
   });
 
   $("refresh-button").addEventListener("click", loadLeads);
-$("refresh-google-button")?.addEventListener("click", loadGoogleMetrics);
+  $("refresh-google-button")?.addEventListener("click", loadGoogleMetrics);
 
   $("search-input").addEventListener("input", renderLeads);
   $("status-filter").addEventListener("change", renderLeads);
