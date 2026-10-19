@@ -228,7 +228,8 @@ async function init() {
     if (error) alert("Não foi possível encerrar a sessão.");
   });
   $("refresh-button").addEventListener("click", loadLeads);
-  $("refresh-google-button").addEventListener("click", loadGoogleMetrics);
+$("refresh-google-button").addEventListener("click", loadGoogleMetrics);
+setupPeriodButtons();
  
 function setupPeriodButtons() {
   const buttons = [...document.querySelectorAll("[data-period]")];
