@@ -929,7 +929,7 @@ async function init() {
   });
 
   $("refresh-button").addEventListener("click", loadLeads);
-  $("refresh-google-button").addEventListener("click", loadGoogleMetrics);
+$("refresh-google-button")?.addEventListener("click", loadGoogleMetrics);
 
   $("search-input").addEventListener("input", renderLeads);
   $("status-filter").addEventListener("change", renderLeads);
