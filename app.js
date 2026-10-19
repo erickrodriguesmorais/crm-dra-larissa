@@ -11,6 +11,55 @@ let loading = false;
 
 const $ = id => document.getElementById(id);
 
+async function loadGoogleMetrics() {
+  const status = $("google-status");
+  const users = $("google-users");
+  const pageViews = $("google-pageviews");
+  const bookingClicks = $("google-booking-clicks");
+  const button = $("refresh-google-button");
+
+  if (status) status.textContent = "Carregando métricas...";
+  if (button) button.disabled = true;
+
+  try {
+    const { data, error } = await db.functions.invoke(
+      "google-analytics-metrics",
+      { method: "GET" }
+    );
+
+    if (error) throw error;
+
+    if (users) {
+      users.textContent = Number(data.users ?? 0).toLocaleString("pt-BR");
+    }
+
+    if (pageViews) {
+      pageViews.textContent = Number(data.pageViews ?? 0).toLocaleString("pt-BR");
+    }
+
+    if (bookingClicks) {
+      bookingClicks.textContent =
+        data.bookingClicks == null
+          ? "—"
+          : Number(data.bookingClicks).toLocaleString("pt-BR");
+    }
+
+    if (status) {
+      status.textContent = "Métricas atualizadas com sucesso.";
+    }
+  } catch (error) {
+    console.error("Erro ao carregar métricas do Google:", error);
+
+    if (status) {
+      status.textContent =
+        "Não foi possível carregar as métricas. Verifique o login e a configuração do Google Analytics.";
+    }
+  } finally {
+    if (button) button.disabled = false;
+  }
+}
+
+
 const esc = value =>
   String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;",
