@@ -229,11 +229,40 @@ async function init() {
   });
   $("refresh-button").addEventListener("click", loadLeads);
   $("refresh-google-button").addEventListener("click", loadGoogleMetrics);
-  document.querySelectorAll("[data-period]").forEach(button => button.addEventListener("click", () => {
-    const days = Number(button.dataset.period); if (days === selectedPeriod) return; selectedPeriod = days;
-    document.querySelectorAll("[data-period]").forEach(b => b.setAttribute("aria-pressed", String(Number(b.dataset.period) === selectedPeriod)));
-    loadGoogleMetrics();
-  }));
+ 
+function setupPeriodButtons() {
+  const buttons = [...document.querySelectorAll("[data-period]")];
+
+  function updateSelectedPeriod() {
+    buttons.forEach(button => {
+      const isSelected =
+        Number(button.dataset.period) === selectedPeriod;
+
+      button.setAttribute("aria-pressed", String(isSelected));
+      button.classList.toggle("active", isSelected);
+    });
+  }
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const days = Number(button.dataset.period);
+
+      if (![7, 30, 90].includes(days)) return;
+
+      selectedPeriod = days;
+      updateSelectedPeriod();
+
+      if (googleData) {
+        renderGoogleTrend(googleData);
+      }
+
+      loadGoogleMetrics();
+    });
+  });
+
+  updateSelectedPeriod();
+}
+
   $("search-input").addEventListener("input", renderLeads);
   $("status-filter").addEventListener("change", renderLeads);
   $("origin-filter").addEventListener("change", renderLeads);
