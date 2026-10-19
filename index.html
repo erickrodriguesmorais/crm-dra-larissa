@@ -47,8 +47,13 @@
         </div>
       </div>
 
-      <a class="active" href="#overview">▦ &nbsp; Visão geral</a>
-      <a href="#leads">♙ &nbsp; Gestão de leads</a>
+<button class="nav-tab active" type="button" data-tab="leads-view">
+  ♙ &nbsp; Leads do site
+</button>
+
+<button class="nav-tab" type="button" data-tab="google-view">
+  ◷ &nbsp; Métricas do Google
+</button>
       <button id="logout-button" class="logout" type="button">↪ Sair</button>
     </aside>
 
@@ -191,6 +196,48 @@
         </div>
       </section>
 
+
+<section id="google-view" class="tab-content hidden">
+  <div class="panel-head">
+    <div>
+      <p class="eyebrow">DESEMPENHO DIGITAL</p>
+      <h2>Métricas do Google</h2>
+      <p class="muted">Resultados do site nos últimos 30 dias completos.</p>
+    </div>
+    <button id="refresh-google-button" class="secondary" type="button">
+      Atualizar métricas
+    </button>
+  </div>
+
+  <p id="google-data-message" class="notice" role="status">
+    As métricas serão carregadas ao abrir esta aba.
+  </p>
+
+  <section class="metrics google-metrics">
+    <article>
+      <span>◎</span>
+      <p>Usuários do site</p>
+      <strong id="google-users">—</strong>
+      <small>Últimos 30 dias</small>
+    </article>
+
+    <article>
+      <span>▤</span>
+      <p>Visualizações de páginas</p>
+      <strong id="google-pageviews">—</strong>
+      <small>Últimos 30 dias</small>
+    </article>
+
+    <article>
+      <span>↗</span>
+      <p>Cliques para agendamento</p>
+      <strong id="google-booking-clicks">—</strong>
+      <small>Depende da configuração do evento no GA4</small>
+    </article>
+  </section>
+</section>
+
+      
       <footer>CRM de gestão de leads · Dra. Larissa Lima</footer>
     </main>
   </div>
