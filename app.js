@@ -525,4 +525,30 @@ async function init() {
   });
 }
 
+
+function setupTabs() {
+  const buttons = document.querySelectorAll(".nav-tab");
+  const leadsView = document.getElementById("leads-view");
+  const googleView = document.getElementById("google-view");
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const selectedTab = button.dataset.tab;
+
+      buttons.forEach(item => {
+        item.classList.toggle("active", item === button);
+      });
+
+      if (leadsView) {
+        leadsView.classList.toggle("hidden", selectedTab !== "leads-view");
+      }
+
+      if (googleView) {
+        googleView.classList.toggle("hidden", selectedTab !== "google-view");
+      }
+    });
+  });
+}
+
+
 document.addEventListener("DOMContentLoaded", init);
