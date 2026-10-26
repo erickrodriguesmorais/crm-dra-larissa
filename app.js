@@ -303,16 +303,17 @@ function renderLeads() {
             ? "Bio Instagram"
             : esc(lead.origem);
 
-        return `<tr>
-          <td>${esc(lead.nome)}</td>
-          <td>${link
-            ? `<a class="whatsapp-link" href="${link}" target="_blank" rel="noopener">${esc(lead.whatsapp)}</a>`
-            : esc(lead.whatsapp)}</td>
-          <td>${originLabel}</td>
-          <td><select class="status-select" data-status-id="${Number(lead.id)}">${options}</select></td>
-          <td>${date(lead.criado_em)}</td>
-          <td><button class="action-button" data-save-id="${Number(lead.id)}" type="button">Salvar</button></td>
-        </tr>`;
+      return `<tr>
+  <td>${esc(lead.nome)}</td>
+  <td>${link
+    ? `<a class="whatsapp-link" href="${link}" target="_blank" rel="noopener">${esc(lead.whatsapp)}</a>`
+    : esc(lead.whatsapp)}</td>
+  <td>${originLabel}</td>
+  <td>${esc(lead.modalidade || "Não informada")}</td>
+  <td><select class="status-select" data-status-id="${Number(lead.id)}">${options}</select></td>
+  <td>${date(lead.criado_em)}</td>
+  <td><button class="action-button" data-save-id="${Number(lead.id)}" type="button">Salvar</button></td>
+</tr>`;
       }).join("")
     : '<tr><td colspan="6" class="empty">Nenhum lead encontrado.</td></tr>';
 }
@@ -326,7 +327,7 @@ async function loadLeads() {
   try {
     const { data, error } = await db
       .from("leads")
-      .select("id,nome,whatsapp,origem,status,criado_em")
+      .select("id,nome,whatsapp,origem,modalidade,status,criado_em")
       .order("criado_em", { ascending: false });
 
     if (error) throw error;
